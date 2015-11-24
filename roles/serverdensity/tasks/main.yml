@@ -1,4 +1,7 @@
 ---
+- name: Getting some extra facts
+  action: ec2_facts
+
 - name: Install Server Density dependencies (Debian/Ubuntu)
   apt:  name=curl
         state=present
@@ -18,9 +21,15 @@
            group=root
            mode=0700
 
-- name: Run the install script
+- name: Run the install script - non Cloud
   shell: /usr/local/src/./serverdensity-install.sh -a {{ sd_url }} -t {{ api_token }} -g {{ group_name }} > /var/log/sd-install.log
           creates=/usr/bin/sd-agent/agent.py
+  when: ansible_ec2_instance_id is undefined
+
+- name: Run the install script - AWS
+  shell: /usr/local/src/./serverdensity-install.sh -a {{ sd_url }} -t {{ api_token }} -g {{ group_name }} -p amazon -i {{ansible_ec2_instance_id}} > /var/log/sd-install.log
+          creates=/usr/bin/sd-agent/agent.py
+  when: ansible_ec2_instance_id is defined
 
 #In order for the variable to stay consistent, this command will execute with every subsequent Ansible run.
 #This variable is used to prevent adding the same server multiple times.
