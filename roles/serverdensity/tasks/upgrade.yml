@@ -18,6 +18,7 @@
 - name: Get agent key
   shell: echo | grep "agent_key" /tmp/sd-agent.config.cfg | awk '{print $2}'
   register: agent_key
+  when: upgrade_v2 is defined
 
 - name: Save key to file
   copy:
@@ -27,6 +28,7 @@
 - name: Register JSON
   command: "cat /var/log/sd-upgrade-v2-key.log.json"
   register: result
+  when: upgrade_v2 is defined
 
 - name: Set JSON to variable
   set_fact:
