@@ -63,7 +63,7 @@
 - name: Register device with the Server Density API - non AWS
   shell: curl -v -X POST https://api.serverdensity.io/inventory/devices/?token={{ api_token }} \
          --data "name={{ sd_hostname | default(ansible_hostname) }}" \
-         --data "group="{{ group_name}}" > /var/log/sd-agent-v2-install.log.json
+         --data "group={{ group_name}}" > /var/log/sd-agent-v2-install.log.json
   args:
     creates: /var/log/sd-agent-v2-install.log.json
   when: not upgraded.stat.exists and ansible_ec2_instance_id is undefined
