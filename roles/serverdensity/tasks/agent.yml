@@ -1,9 +1,6 @@
 ---
 - name: Add the Server Density repository signing key (Debian/Ubuntu)
-  apt_key:
-    id: "74371316"
-    data: "{{ item }}"
-  with_file: "{{sd-packaging-public.key}}"
+  apt_key: id=74371316 url=https://archive.serverdensity.com/sd-packaging-public.key state=present
   when: ansible_os_family == "Debian"
 
 - name: Add Server Density repository (Debian/Ubuntu)
@@ -15,7 +12,7 @@
   when: ansible_os_family == "Debian"
 
 - name: Install Server Density repository signing key (RedHat/CentOS)
-  rpm_key: state=present key=sd-packaging-public.key
+  rpm_key: state=present key=https://archive.serverdensity.com/sd-packaging-public.key
   when: ansible_os_family == "RedHat"
 
 - name: Add server Density repository (RedHat/CentOS)
@@ -60,8 +57,7 @@
       group: "{{ group_name }}"
     body_format: json
     register: create_response
-  args:
-    creates: /var/log/sd-agent-v2-install.log.json
+    dest: /var/log/sd-agent-v2-install.log.json
   when: not upgraded.stat.exists and ansible_ec2_instance_id is undefined
 
 - name: Register device with the Server Density API - AWS
@@ -75,8 +71,7 @@
       providerId: "{{ ansible_ec2_instance_id }}"
     body_format: json
     register: create_response
-  args:
-    creates: /var/log/sd-agent-v2-install.log.json
+    dest: /var/log/sd-agent-v2-install.log.json
   when: not upgraded.stat.exists and ansible_ec2_instance_id is defined
 
 - name: Register JSON
