@@ -3,7 +3,7 @@
   apt_key:
     id: "74371316"
     data: "{{ item }}"
-  with_file: sd-packaging-public.key
+  with_file: "{{sd-packaging-public.key}}"
   when: ansible_os_family == "Debian"
 
 - name: Add Server Density repository (Debian/Ubuntu)
@@ -14,17 +14,8 @@
     - "deb https://archive.serverdensity.com/{{ ansible_lsb.id | lower }}/ all main"
   when: ansible_os_family == "Debian"
 
-- name: Copy Server Density repository signing key (RedHat/CentOS)
-  copy:
-    src: sd-packaging-public.key
-    dest: /etc/pki/rpm-gpg/RPM-GPG-KEY-serverdensity
-    owner: root
-    group: root
-    mode: 0644
-  when: ansible_os_family == "RedHat"
-
 - name: Install Server Density repository signing key (RedHat/CentOS)
-  command: rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-serverdensity
+  rpm_key: state=present key=sd-packaging-public.key
   when: ansible_os_family == "RedHat"
 
 - name: Add server Density repository (RedHat/CentOS)
@@ -39,7 +30,7 @@
 - name: Install/Update Server Density agent (Debian/Ubuntu)
   apt:
     name: sd-agent
-    state: latest
+    state: present
     update-cache: yes
     cache_valid_time: 86400
   notify: restart sd-agent
@@ -48,7 +39,7 @@
 - name: Install/Update Server Density agent (RedHat/CentOS)
   yum:
     name: sd-agent
-    state: latest
+    state: present
   notify: restart sd-agent
   when: ansible_os_family == "RedHat"
 
@@ -60,20 +51,30 @@
     path: /var/log/sd-upgrade-v2-key.log.json
   register: upgraded
 
-- name: Register device with the Server Density API - non AWS
-  shell: curl -v -X POST https://api.serverdensity.io/inventory/devices/?token={{ api_token }} \
-         --data "name={{ sd_hostname | default(ansible_hostname) }}" \
-         --data "group={{ group_name}}" > /var/log/sd-agent-v2-install.log.json
+- name: Register device with the Server Density API - Non AWS
+  uri:
+    url: https://api.serverdensity.io/inventory/devices/?token={{ api_token }}
+    method: POST
+    body:
+      name: "{{ sd_hostname | default(ansible_hostname) }}"
+      group: "{{ group_name }}"
+    body_format: json
+    register: create_response
   args:
     creates: /var/log/sd-agent-v2-install.log.json
   when: not upgraded.stat.exists and ansible_ec2_instance_id is undefined
 
 - name: Register device with the Server Density API - AWS
-  shell: curl -v -X POST https://api.serverdensity.io/inventory/devices/?token={{ api_token }} \
-         --data "name={{ sd_hostname | default(ansible_ec2_instance_id) }}" \
-         --data "group={{ group_name}}" \
-         --data "provider=amazon" \
-         --data "providerId={{ ansible_ec2_instance_id }}" > /var/log/sd-agent-v2-install.log.json
+  uri:
+    url: https://api.serverdensity.io/inventory/devices/?token={{ api_token }}
+    method: POST
+    body:
+      name: "{{ sd_hostname | default(ansible_hostname) }}"
+      group: "{{ group_name }}"
+      provider: "amazon"
+      providerId: "{{ ansible_ec2_instance_id }}"
+    body_format: json
+    register: create_response
   args:
     creates: /var/log/sd-agent-v2-install.log.json
   when: not upgraded.stat.exists and ansible_ec2_instance_id is defined
