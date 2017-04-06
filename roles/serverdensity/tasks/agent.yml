@@ -11,7 +11,7 @@
     repo: "{{ item }}"
     state: present
   with_items:
-    - "deb https://archive.serverdensity.com/{{ ansible_lsb.id | lower }}/ all main"
+    - "deb https://archive.serverdensity.com/ubuntu/ all main"
   when: ansible_os_family == "Debian"
 
 - name: Copy Server Density repository signing key (RedHat/CentOS)
