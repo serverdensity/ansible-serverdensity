@@ -68,15 +68,33 @@
     creates: /var/log/sd-agent-v2-install.log.json
   when: not upgraded.stat.exists and ansible_ec2_instance_id is undefined
 
-- name: Register device with the Server Density API - AWS
-  shell: curl -v -X POST https://api.serverdensity.io/inventory/devices/?token={{ api_token }} \
-         --data "name={{ sd_hostname | default(ansible_ec2_instance_id) }}" \
-         --data "group={{ group_name}}" \
-         --data "provider=amazon" \
-         --data "providerId={{ ansible_ec2_instance_id }}" > /var/log/sd-agent-v2-install.log.json
-  args:
-    creates: /var/log/sd-agent-v2-install.log.json
+- name: Attempt to lookup device with the Server Density API - AWS
+  uri:
+    url: https://api.serverdensity.io/inventory/resources?token={{ api_token }}&filter=%7b%22providerId%22%3a%22{{ ansible_ec2_instance_id }}%22%7d
+    status_code: 200
+    dest: /var/log/sd-agent-v2-install.log.json
+  register: http_response
   when: not upgraded.stat.exists and ansible_ec2_instance_id is defined
+
+- name: Remove from list
+  replace:
+    dest=/var/log/sd-agent-v2-install.log.json
+    regexp="{{ item.regexp }}"
+    replace="{{ item.replace }}"
+  with_items:
+    - { regexp: '^\[', replace: '' }
+    - { regexp: '\]$', replace: '' }
+  when: http_response.x_total_number > 0
+
+- name: Register device with the Server Density API - AWS
+  uri:
+    url: https://api.serverdensity.io/inventory/devices/?token={{ api_token }}
+    method: POST
+    body: "name={{ sd_hostname | default(ansible_ec2_instance_id) }}&group={{ group_name}}&provider=amazon&providerId={{ ansible_ec2_instance_id }}"
+    status_code: 200
+    dest: /var/log/sd-agent-v2-install.log.json
+    creates: /var/log/sd-agent-v2-install.log.json
+  when: not upgraded.stat.exists and ansible_ec2_instance_id is defined and http_response.x_total_number == "0"
 
 - name: Register JSON
   command: cat /var/log/sd-agent-v2-install.log.json
