@@ -79,7 +79,7 @@
 
 - name: Attempt to lookup device with the Server Density API - AWS
   uri:
-    url: https://api.serverdensity.io/inventory/resources?token={{ api_token }}&filter=%7b%22providerId%22%3a%22{{ ansible_ec2_instance_id }}%22%7d
+    url: https://api.serverdensity.io/inventory/resources?token={{ api_token }}&filter=%7b%22providerId%22%3a%22{{ ansible_ec2_instance_id }}%22%2c%22provider%22%3a%22amazon%22%7d
     status_code: 200
     dest: /var/log/sd-agent-v2-install.log.json
   register: aws_response
