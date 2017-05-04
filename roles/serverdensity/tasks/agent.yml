@@ -104,7 +104,6 @@
     - { regexp: '\]$', replace: '' }
   when: (aws_response and aws_response.x_total_number is defined and aws_response.x_total_number > 0) or (http_response and http_response.x_total_number is defined and http_response.x_total_number > 0)
 
-
 - name: Register JSON
   command: cat /var/log/sd-agent-v2-install.log.json
   register: result
