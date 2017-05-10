@@ -114,16 +114,17 @@
   register: result_upgraded
   when: upgraded.stat.exists
 
+- name: Set fact agent_group
+  set_fact:
+   agent_group: "{{ item }}"
+  with_items: "{{aws_response|json_query('json[*].group')}}"
+  when: aws_response is defined
+
 - block:
     - name: Set fact agent_id
       set_fact:
        agent_id: "{{ item }}"
       with_items: "{{aws_response|json_query('json[*]._id')}}"
-
-    - name: Set fact agent_group
-      set_fact:
-       agent_group: "{{ item }}"
-      with_items: "{{aws_response|json_query('json[*].group')}}"
 
     - name: Update Group name when is not defined
       uri:
