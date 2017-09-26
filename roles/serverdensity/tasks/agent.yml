@@ -66,6 +66,9 @@
     status_code: 200
     dest: /var/log/sd-agent-v2-install.log.json
   register: http_response
+  until: http_response.status == 200
+  retries: 60
+  delay: 1
   when: not upgraded.stat.exists and ansible_ec2_instance_id is undefined
 
 - name: Register device with the Server Density API - non AWS
@@ -73,8 +76,12 @@
     url: https://api.serverdensity.io/inventory/devices/?token={{ api_token }}
     method: POST
     body: "name={{ sd_hostname | default(ansible_hostname) }}&group={{ group_name}}"
-    status_code: 200
     dest: /var/log/sd-agent-v2-install.log.json
+    status_code: 200
+  until: non_aws_response.status == 200
+  retries: 60
+  delay: 1
+  register: non_aws_response
   when: not upgraded.stat.exists and ansible_ec2_instance_id is undefined and http_response.x_total_number == "0"
 
 - name: Attempt to lookup device with the Server Density API - AWS
@@ -82,6 +89,9 @@
     url: https://api.serverdensity.io/inventory/resources?token={{ api_token }}&filter=%7b%22providerId%22%3a%22{{ ansible_ec2_instance_id }}%22%2c%22provider%22%3a%22amazon%22%7d
     status_code: 200
     dest: /var/log/sd-agent-v2-install.log.json
+  until: aws_response.status == 200
+  retries: 60
+  delay: 1
   register: aws_response
   when: not upgraded.stat.exists and ansible_ec2_instance_id is defined
 
@@ -92,6 +102,10 @@
     body: "name={{ sd_hostname | default(ansible_ec2_instance_id) }}&group={{ group_name}}&provider=amazon&providerId={{ ansible_ec2_instance_id }}"
     status_code: 200
     dest: /var/log/sd-agent-v2-install.log.json
+  until: aws_register.status == 200
+  retries: 60
+  delay: 1
+  register: aws_register
   when: not upgraded.stat.exists and ansible_ec2_instance_id is defined and aws_response.x_total_number == "0"
 
 - name: Remove from list
