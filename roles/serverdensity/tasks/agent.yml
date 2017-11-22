@@ -2,8 +2,7 @@
 - name: Add the Server Density repository signing key (Debian/Ubuntu)
   apt_key:
     id: "74371316"
-    data: "{{ item }}"
-  with_file: sd-packaging-public.key
+    url: https://archive.serverdensity.com/sd-packaging-public.key
   when: ansible_os_family == "Debian"
 
 - name: Add Server Density repository (Debian/Ubuntu)
@@ -15,8 +14,8 @@
   when: ansible_os_family == "Debian"
 
 - name: Copy Server Density repository signing key (RedHat/CentOS)
-  copy:
-    src: sd-packaging-public.key
+  get_url:
+    url: https://archive.serverdensity.com/sd-packaging-public.key
     dest: /etc/pki/rpm-gpg/RPM-GPG-KEY-serverdensity
     owner: root
     group: root
