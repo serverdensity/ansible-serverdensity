@@ -5,12 +5,18 @@
     url: https://archive.serverdensity.com/sd-packaging-public.key
   when: ansible_os_family == "Debian"
 
+- name: Set repository release (Debian/Ubuntu)
+  set_fact:
+    repo_release: "{% if ansible_distribution_release in item.value %} {{ item.key }} {% else %} {{ ansible_distribution_release }} {% endif %}"
+  with_dict: "{{ ubuntu_repos }}"
+  when: ansible_os_family == "Debian"
+
 - name: Add Server Density repository (Debian/Ubuntu)
   apt_repository:
     repo: "{{ item }}"
     state: present
   with_items:
-    - "deb https://archive.serverdensity.com/ubuntu/ all main"
+    - "deb https://archive.serverdensity.com/{{ ansible_distribution|lower }} {{ repo_release }} main"
   when: ansible_os_family == "Debian"
 
 - name: Copy Server Density repository signing key (RedHat/CentOS)
