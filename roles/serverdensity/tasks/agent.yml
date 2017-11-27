@@ -41,6 +41,19 @@
     mode: 0644
   when: ansible_os_family == "RedHat"
 
+- name: Set repository release (RedHat/CentOS 6)
+  set_fact:
+    ius_location: "{% if ansible_distribution == 'CentOS' %}centos{% else %}rhel{% endif %}"
+  when: ansible_os_family == "RedHat" and ansible_distribution_version.split('.')[0] == "6"
+
+- name: Install epel and ius repositories (RedHat/CentOS)
+  yum:
+    name:
+      - https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm
+      - https://{{ius_location}}6.iuscommunity.org/ius-release.rpm
+    state: present
+  when: ansible_os_family == "RedHat" and ansible_distribution_version.split('.')[0] == "6"
+
 - name: Install/Update Server Density agent (Debian/Ubuntu)
   apt:
     name: sd-agent
