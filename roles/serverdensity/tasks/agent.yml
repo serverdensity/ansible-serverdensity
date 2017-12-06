@@ -2,8 +2,13 @@
 - name: Add the Server Density repository signing key (Debian/Ubuntu)
   apt_key:
     id: "74371316"
-    data: "{{ item }}"
-  with_file: sd-packaging-public.key
+    url: https://archive.serverdensity.com/sd-packaging-public.key
+  when: ansible_os_family == "Debian"
+
+- name: Set repository release (Debian/Ubuntu)
+  set_fact:
+    repo_release: "{% if ansible_distribution_release in item.value %} {{ item.key }} {% else %} {{ ansible_distribution_release }} {% endif %}"
+  with_dict: "{{ ubuntu_repos }}"
   when: ansible_os_family == "Debian"
 
 - name: Add Server Density repository (Debian/Ubuntu)
@@ -11,12 +16,12 @@
     repo: "{{ item }}"
     state: present
   with_items:
-    - "deb https://archive.serverdensity.com/ubuntu/ all main"
+    - "deb https://archive.serverdensity.com/{{ ansible_distribution|lower }} {{ repo_release }} main"
   when: ansible_os_family == "Debian"
 
 - name: Copy Server Density repository signing key (RedHat/CentOS)
-  copy:
-    src: sd-packaging-public.key
+  get_url:
+    url: https://archive.serverdensity.com/sd-packaging-public.key
     dest: /etc/pki/rpm-gpg/RPM-GPG-KEY-serverdensity
     owner: root
     group: root
@@ -35,6 +40,19 @@
     group: root
     mode: 0644
   when: ansible_os_family == "RedHat"
+
+- name: Set repository release (RedHat/CentOS 6)
+  set_fact:
+    ius_location: "{% if ansible_distribution == 'CentOS' %}centos{% else %}rhel{% endif %}"
+  when: ansible_os_family == "RedHat" and ansible_distribution_version.split('.')[0] == "6"
+
+- name: Install epel and ius repositories (RedHat/CentOS)
+  yum:
+    name:
+      - https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm
+      - https://{{ius_location}}6.iuscommunity.org/ius-release.rpm
+    state: present
+  when: ansible_os_family == "RedHat" and ansible_distribution_version.split('.')[0] == "6"
 
 - name: Install/Update Server Density agent (Debian/Ubuntu)
   apt:

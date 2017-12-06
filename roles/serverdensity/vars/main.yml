@@ -5,3 +5,23 @@
 #Uncomment and update the variables below
 #sd_account: "example"        #####previously sd_url: "https://example.serverdensity.io"#####
 #api_token: "Your_API_Token"
+
+
+# Ubuntu Repository dictionary. Used to select the correct repo for your specific Ubuntu release
+# Please do not edit below this line
+ubuntu_repos:
+  xenial:
+    - xenial
+    - artful
+    - yakkety
+    - zesty
+  trusty:
+    - trusty
+    - utopic
+    - vivid
+    - wily
+  all:
+    - precise
+    - quantal
+    - raring
+    - saucy
