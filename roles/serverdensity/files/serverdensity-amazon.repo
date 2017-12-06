@@ -1,0 +1,6 @@
+[server-density]
+name=Server Density Repository for Enterprise Linux 6
+baseurl=http://archive.serverdensity.com/el/6
+failovermethod=priority
+enabled=1
+gpgcheck=1
