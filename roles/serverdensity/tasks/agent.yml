@@ -155,6 +155,27 @@
   register: result_upgraded
   when: upgraded.stat.exists
 
+- name: Set fact agent_group
+  set_fact:
+   agent_group: "{{ item }}"
+  with_items: "{{aws_response|json_query('json[*].group')}}"
+  when: aws_response is defined
+
+- block:
+    - name: Set fact agent_id
+      set_fact:
+       agent_id: "{{ item }}"
+      with_items: "{{aws_response|json_query('json[*]._id')}}"
+
+    - name: Update Group name when is not defined
+      uri:
+        url: https://api.serverdensity.io/inventory/devices/{{agent_id }}?token={{ api_token }}
+        method: PUT
+        body: "group={{ group_name }}"
+        status_code: 200
+        dest: /var/log/sd-agent-v2-install.log.json
+  when: group_name is defined and agent_group is not defined and ansible_ec2_instance_id is defined
+
 - name: Set JSON to variable
   set_fact:
     api_result: "{{ result.stdout|from_json }}"
