@@ -12,6 +12,7 @@
 ubuntu_repos:
   bionic:
     - bionic
+    - cosmic
   xenial:
     - xenial
     - artful
