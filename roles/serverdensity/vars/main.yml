@@ -10,6 +10,9 @@
 # Ubuntu Repository dictionary. Used to select the correct repo for your specific Ubuntu release
 # Please do not edit below this line
 ubuntu_repos:
+  bionic:
+    - bionic
+    - cosmic
   xenial:
     - xenial
     - artful
