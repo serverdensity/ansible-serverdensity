@@ -80,7 +80,7 @@
   when: ansible_os_family == "RedHat"
 
 - name: Getting some extra facts
-  action: ec2_facts
+  action: ec2_metadata_facts
 
 - name: Check to see if we previously upgraded the Server Density agent from v1 to v2
   stat:
