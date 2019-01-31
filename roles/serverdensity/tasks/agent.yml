@@ -81,6 +81,7 @@
 
 - name: Getting some extra facts
   action: ec2_metadata_facts
+  when: "'amazon' in ansible_bios_version"
 
 - name: Check to see if we previously upgraded the Server Density agent from v1 to v2
   stat:
