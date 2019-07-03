@@ -3,7 +3,7 @@ ansible-serverdensity
 [Ansible](http://www.ansibleworks.com/) playbook for automatically deploying the Server Density agent.
 
 ## Requirements
-[Ansible](http://docs.ansible.com/intro_installation.html) >= 1.9
+[Ansible](http://docs.ansible.com/intro_installation.html) >= 2.4
 
 ## Platforms
 * Debian/Ubuntu

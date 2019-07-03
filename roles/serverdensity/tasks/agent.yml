@@ -81,6 +81,7 @@
 
 - name: Getting some extra facts
   action: ec2_metadata_facts
+  when: "'amazon' in ansible_bios_version"
 
 - name: Check to see if we previously upgraded the Server Density agent from v1 to v2
   stat:
@@ -89,7 +90,7 @@
 
 - name: Attempt to lookup device with the Server Density API - non AWS
   uri:
-    url: https://api.serverdensity.io/inventory/resources?token={{ api_token }}&filter=%7b%22name%22%3a%22{{ sd_hostname | default(ansible_hostname) }}%22%7d
+    url: https://api.serverdensity.io/inventory/resources?token={{ api_token }}&filter=%7B%22name%22%3A%22{{ sd_hostname | default(ansible_hostname) }}%22%2C%20%22type%22%3A%20%22device%22%7D
     status_code: 200
     dest: /var/log/sd-agent-v2-install.log.json
   register: http_response
