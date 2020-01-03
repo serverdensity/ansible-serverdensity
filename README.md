@@ -12,6 +12,8 @@ ansible-serverdensity
 ## Usage
 This playbook will install the Server Density v2 agent, allowing for custom configuration and server grouping.
 
+ansible-galaxy install 'git+https://github.com/serverdensity/ansible-serverdensity.git'
+
 ## Whats new
 - Now installs Server Density agent v2.
 - Added upgrade logic.
