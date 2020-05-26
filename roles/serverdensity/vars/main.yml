@@ -13,6 +13,9 @@ ubuntu_repos:
   bionic:
     - bionic
     - cosmic
+    - eoan
+  focal:
+    - focal
   xenial:
     - xenial
     - artful
