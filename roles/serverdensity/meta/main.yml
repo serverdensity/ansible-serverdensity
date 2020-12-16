@@ -1,0 +1,10 @@
+galaxy_info:
+  description: Automatically deploy the Server Density agent.
+  company: Server Density
+
+  min_ansible_version: 2.4
+
+  galaxy_tags:
+    - serverdensity
+
+dependencies: []
